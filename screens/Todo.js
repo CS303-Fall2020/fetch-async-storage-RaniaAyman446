@@ -23,12 +23,31 @@ export default function Home ({navigation})  {
 
  
     const [todos, setTodos] = useState([]);
-    useEffect(async ()=>{
-        const response= await fetch("https://jsonplaceholder.typicode.com/todos?userId=1")
-        const data = await response.json();
-        const item = data;
-        setTodos(item)
+    useEffect( ()=>{
+         fetch("https://jsonplaceholder.typicode.com/todos?userId=1")
+        .then((response)=>response.json())
+        .then(response=>{
+          setTodos(response),
+          setLoading(false)
+        })
+        .then((json) => console.log(json))
+        .catch(e => {
+          console.error(e)
+        })
     },[])
+  
+  const onRefresh = async () => {
+      setLoading(!loading);
+      return fetch("https://jsonplaceholder.typicode.com/todos?userId=1")
+      .then((response) => response.json())
+      .then((responseJson) => {
+        setTodos(responseJson),
+        setLoading(false)
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+    }
  
  const pressHandler2 = id =>{
      setTodos(prevTodos=>{
@@ -89,6 +108,8 @@ export default function Home ({navigation})  {
         <View style={styles.contant}>
           <AddTodo submitHandler={submitHandler} />
           <View style={styles.list}>
+            {(loading)? (<ActivityIndicator size="large" color="skyblue"/>)
+            :(
             <FlatList
               data={todos}
               renderItem={({ item }) => (
@@ -98,9 +119,10 @@ export default function Home ({navigation})  {
               
               )}
             />
+            )}
           </View>
         </View>
-        <Button  title='Refresh'  color='skyblue'  />
+        <Button  title='Refresh'  color='skyblue' onPress={onRefresh} />
       </View>
     </TouchableWithoutFeedback>
   );
